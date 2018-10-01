@@ -1,0 +1,222 @@
+<div class="wrapper-middle" id="app" v-cloak>
+	<div v-show="isShow" class="table-responsive" id="main-container" style="overflow: hidden">
+		<table class="table esf-table-single-head" style="width: 100%; margin-bottom: 0;">
+			<thead>
+				<tr>
+					<th style="width: 320px;">FY</th>
+					<th style="width: 150px; text-align: right;" v-for="h in headers">
+						{{h}}
+					</th>
+				</tr>
+			</thead>
+		</table>
+		<table class="table investment-details-table expand-table" style="width: 100%">
+			<tbody>
+				<tr v-for="b in bodies" v-bind:data-toggle="b.toggle" v-bind:class="b.css">
+					<td v-on:click="toggle(b.toggle)" v-bind:class="[b.IsGrouped ? 'esf-cursor': '', 'tdPadding']" v-html="b.LeftTitle"></td>
+					<td style="text-align: right;" v-for="(d, index) in b.Data">
+						<span v-show="filter.viewType == 1">{{kendo.toString(d.Amount,"c0")}}</span>
+						<span v-show="filter.viewType == 2">{{kendo.toString(d.Count,"n0")}}</span>
+						<span v-show="filter.viewType == 3">{{kendo.toString(d.Count / footers[index].feeDue.Count,"p2").replace(/\s/g, '')}}</span>
+					</td>
+				</tr>
+			</tbody>
+			<tfoot>
+				<tr class="investment-details-total">
+					<td style="width: 320px;">Fee Due - Total</td>
+					<td style="width: 150px; text-align: right;" v-for="f in footers">
+						<span v-show="filter.viewType == 1">{{kendo.toString(f.feeDue.Amount, "c0")}}</span>
+						<span v-show="filter.viewType == 2">{{kendo.toString(f.feeDue.Count, "n0")}}</span>
+						<span v-show="filter.viewType == 3">{{kendo.toString(f.feeDue.Count, "n0")}}</span>
+					</td>
+				</tr>
+				<tr class="investment-details-total">
+					<td style="width: 320px;">Fee Paid</td>
+					<td style="width: 150px; text-align: right;" v-for="f in footers">
+						<span v-show="filter.viewType == 1">{{kendo.toString(f.feePaid.Amount, "c0")}}</span>
+						<span v-show="filter.viewType == 2">{{kendo.toString(f.feePaid.Count, "n0")}}</span>
+						<span v-show="filter.viewType == 3">{{kendo.toString(f.feePaid.Count / f.feeDue.Count, "p2").replace(/\s/g, '')}}</span>
+					</td>
+				</tr>
+				<tr class="investment-details-total">
+					<td style="width: 320px;">Fee Owing</td>
+					<td style="width: 150px; text-align: right;" v-for="f in footers">
+						<span v-show="filter.viewType == 1">{{kendo.toString(f.feeOwing.Amount, "c0")}}</span>
+						<span v-show="filter.viewType == 2">{{kendo.toString(f.feeOwing.Count, "n0")}}</span>
+						<span v-show="filter.viewType == 3">{{kendo.toString(f.feeOwing.Count / f.feeDue.Count, "p2").replace(/\s/g, '')}}</span>
+					</td>
+				</tr>
+				<tr class="investment-details-total">
+					<td style="width: 320px;">Average Fee</td>
+					<td style="width: 150px; text-align: right;" v-for="f in footers">
+						<span>{{kendo.toString(f.feeAvg.Amount, "c0")}}</span>
+					</td>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+	<pagination v-show="isShow" :total-pages="totalPages" :current-page="currentPage" @@pagechanged="onPageChange" />
+</div>
+
+
+<script type="text/x-template" id="pagination">
+    <ul class="col-choose-btn-container">
+        <li class="pagination-item">
+            <button type="button"
+                    @@click="onClickFirstPage"
+                    :disabled="isInFirstPage"
+                    aria-label="Go to first page" class="btn column-fastbackward-btn">
+                <i class="fa fa-fast-backward" aria-hidden="true"></i>
+            </button>
+        </li>
+
+        <li class="pagination-item">
+            <button type="button"
+                    @@click="onClickPreviousPage"
+                    :disabled="isInFirstPage"
+                    aria-label="Go to previous page" class="btn column-backward-btn">
+                <i class="fa fa-backward" aria-hidden="true"></i>
+            </button>
+        </li>
+
+        <li class="pagination-item">
+            <button type="button"
+                    @@click="onClickNextPage"
+                    :disabled="isInLastPage"
+                    aria-label="Go to next page" class="btn column-forward-btn">
+                <i class="fa fa-forward" aria-hidden="true"></i>
+            </button>
+        </li>
+
+        <li class="pagination-item">
+            <button type="button"
+                    @@click="onClickLastPage"
+                    :disabled="isInLastPage"
+                    aria-label="Go to last page" class="btn column-fastforward-btn">
+                <i class="fa fa-fast-forward" aria-hidden="true"></i>
+            </button>
+        </li>
+    </ul>
+</script>
+
+<script>
+	var app = new Vue({
+        el: "#app",
+        components: {
+            pagination: Pagination
+        },
+        data: {
+            filter: {
+                viewType: "1",
+                includeBlacklist: false,
+                __RequestVerificationToken: getToken()
+            },
+            isShow: false,
+            headerData: [],
+            data: [],
+            headers: [],
+            openingTotals: [],
+            bodies: [],
+            footers: [],
+            currentPage: 1,
+            totalPages: 1,
+            colLimit: 5
+        },
+        mounted: function () {
+            this.getSummaries();
+        },
+        computed: {
+            kendoOpts: function () {
+                var opts = {};
+
+                opts.viewType = {
+                    dataSource: [
+                        { Text: "Fees ($)", Value: "1" },
+                        { Text: "Clients", Value: "2" },
+                        { Text: "Percentage (%)", Value: "3" }
+                    ]
+                };
+                return opts;
+            }
+        },
+        methods: {
+            toggle: function (toggle) {
+                var isShowGrp = !$("[data-toggle=Group" + toggle + "]").hasClass("hidden");
+                if (isShowGrp) {
+                    $("[data-toggle=Group" + toggle + "]").addClass("hidden");
+                } else {
+                    $("[data-toggle=Group" + toggle + "]").removeClass("hidden");
+                }
+            },
+
+            reset: function () {
+                this.headers = [];
+                this.bodies = [];
+                this.footers = [];
+            },
+
+            onPageChange: function (page) {
+                this.reset();
+                this.currentPage = page;
+                this.buildTable(this.currentPage);
+            },
+
+            getSummaries: function () {
+                this.isShow = false;
+                this.reset();
+                this.currentPage = 1;
+                $.post("/url", { includeBlacklist: this.filter.includeBlacklist }, function (res) {
+                    app.data = res.Summaries;
+                    app.headerData = res.Headers;
+                    app.buildTable(1);
+                });
+            },
+
+            buildTable: function (currentPage) {
+                var headers = [];
+                var headerData = $.extend(true, [], this.headerData);
+                var data = $.extend(true, [], this.data);
+                var footers = [];
+                for (var i = 0; i < headerData.length; i++) {
+                    var header = "30 June " + headerData[i];
+                    headers.push(header);
+                    var footer = {};
+                    footer.feeDue = data[data.length - 4].Data[i];
+                    footer.feePaid = data[data.length - 3].Data[i];
+                    footer.feeOwing = data[data.length - 2].Data[i];
+                    footer.feeAvg = data[data.length - 1].Data[i];
+                    footers.push(footer);
+                }
+                var bodies = [];
+                var order = 0;
+                for (var j = 0; j < data.length; j++) {
+                    var body = data[j];
+                    if (body.Order === order) {
+                        body.toggle = "Group" + order;
+                        body.css = "hidden";
+                        body.LeftTitle = "<span style='padding-left: 50px;'>" + body.LeftTitle + "</span>";
+                        //set values for parent group
+                        if (body.toggle !== data[j - 1].toggle) {
+                            data[j - 1].toggle = order;
+                            data[j - 1].LeftTitle = "<span style='color: #1e78af;'>" + data[j - 1].LeftTitle + "</span>";
+                        }
+                    }
+                    else {
+                        order = body.Order;
+                    }
+                    bodies.push(body);
+                }
+                this.totalPages = headers.length - this.colLimit + 1;// +1 because totalpage start at 1
+                //trim array to display
+                var cut = currentPage - 1;//start at 0
+                this.headers = headers.slice(cut, this.colLimit + cut);
+                for (var k = 0; k < bodies.length - 4; k++) {
+                    bodies[k].Data = bodies[k].Data.slice(cut, this.colLimit + cut);
+                    this.bodies.push(bodies[k]);
+                }
+                this.footers = footers.slice(cut, this.colLimit + cut);
+                this.isShow = true;
+            }
+        }
+    });
+</script>
