@@ -36,14 +36,30 @@ Vue.component("currency-input", {
                 }
             },
             methods: {  
-                isNumber: function (evt) {
-                    evt = (evt) ? evt : window.event;
-                    var charCode = (evt.which) ? evt.which : evt.keyCode;
-                    if ((charCode < 48 || charCode > 57) && (charCode < 96 || charCode > 105) && charCode !== 46 && charCode !== 8 && charCode !== 9 && charCode !== 110)
-                        evt.preventDefault();
-                     else 
-                        return true;                    
-                },
+                isNumber: function(evt) {
+                        // https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
+                    var keyCode = (evt.which) ? evt.which : event.keyCode;
+                    // Ctrl + a, c, v
+                    if (evt.ctrlKey && ([65, 67, 86].indexOf(keyCode) != -1))
+                        return true;
+                    // Left & Right Arrow
+                    if ([37, 39].indexOf(keyCode) != -1)
+                        return true;
+                    // Top Number Key
+                    if (keyCode >= 48 && keyCode <= 57)
+                        return true;
+                    // Numpad Number Key
+                    if (keyCode >= 96 && keyCode <= 105)
+                        return true;
+                    // Backspace, Delete, and Tab
+                    if (keyCode == 8 || keyCode == 9 || keyCode == 46)
+                        return true;
+                    // Dot, and Check if there is Dot
+                    if ((keyCode == 110 || keyCode == 190) && (this.displayValue + "").indexOf(".") == -1)
+                        return true;
+                    evt.preventDefault();
+                    return false;
+                    },
                 onBlur: function () {
                     this.isInputActive = false;
                     this.$emit('blur');
