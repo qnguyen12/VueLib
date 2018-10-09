@@ -1,61 +1,71 @@
-<div class="wrapper-middle" id="app" v-cloak>
-	<div v-show="isShow" class="table-responsive" id="main-container" style="overflow: hidden">
-		<table class="table esf-table-single-head" style="width: 100%; margin-bottom: 0;">
-			<thead>
-				<tr>
-					<th style="width: 320px;">FY</th>
-					<th style="width: 150px; text-align: right;" v-for="h in headers">
-						{{h}}
-					</th>
-				</tr>
-			</thead>
-		</table>
-		<table class="table investment-details-table expand-table" style="width: 100%">
-			<tbody>
-				<tr v-for="b in bodies" v-bind:data-toggle="b.toggle" v-bind:class="b.css">
-					<td v-on:click="toggle(b.toggle)" v-bind:class="[b.IsGrouped ? 'esf-cursor': '', 'tdPadding']" v-html="b.LeftTitle"></td>
-					<td style="text-align: right;" v-for="(d, index) in b.Data">
-						<span v-show="filter.viewType == 1">{{kendo.toString(d.Amount,"c0")}}</span>
-						<span v-show="filter.viewType == 2">{{kendo.toString(d.Count,"n0")}}</span>
-						<span v-show="filter.viewType == 3">{{kendo.toString(d.Count / footers[index].feeDue.Count,"p2").replace(/\s/g, '')}}</span>
-					</td>
-				</tr>
-			</tbody>
-			<tfoot>
-				<tr class="investment-details-total">
-					<td style="width: 320px;">Fee Due - Total</td>
-					<td style="width: 150px; text-align: right;" v-for="f in footers">
-						<span v-show="filter.viewType == 1">{{kendo.toString(f.feeDue.Amount, "c0")}}</span>
-						<span v-show="filter.viewType == 2">{{kendo.toString(f.feeDue.Count, "n0")}}</span>
-						<span v-show="filter.viewType == 3">{{kendo.toString(f.feeDue.Count, "n0")}}</span>
-					</td>
-				</tr>
-				<tr class="investment-details-total">
-					<td style="width: 320px;">Fee Paid</td>
-					<td style="width: 150px; text-align: right;" v-for="f in footers">
-						<span v-show="filter.viewType == 1">{{kendo.toString(f.feePaid.Amount, "c0")}}</span>
-						<span v-show="filter.viewType == 2">{{kendo.toString(f.feePaid.Count, "n0")}}</span>
-						<span v-show="filter.viewType == 3">{{kendo.toString(f.feePaid.Count / f.feeDue.Count, "p2").replace(/\s/g, '')}}</span>
-					</td>
-				</tr>
-				<tr class="investment-details-total">
-					<td style="width: 320px;">Fee Owing</td>
-					<td style="width: 150px; text-align: right;" v-for="f in footers">
-						<span v-show="filter.viewType == 1">{{kendo.toString(f.feeOwing.Amount, "c0")}}</span>
-						<span v-show="filter.viewType == 2">{{kendo.toString(f.feeOwing.Count, "n0")}}</span>
-						<span v-show="filter.viewType == 3">{{kendo.toString(f.feeOwing.Count / f.feeDue.Count, "p2").replace(/\s/g, '')}}</span>
-					</td>
-				</tr>
-				<tr class="investment-details-total">
-					<td style="width: 320px;">Average Fee</td>
-					<td style="width: 150px; text-align: right;" v-for="f in footers">
-						<span>{{kendo.toString(f.feeAvg.Amount, "c0")}}</span>
-					</td>
-				</tr>
-			</tfoot>
-		</table>
-	</div>
-	<pagination v-show="isShow" :total-pages="totalPages" :current-page="currentPage" @@pagechanged="onPageChange" />
+<!DOCTYPE html>
+<html>
+<head>	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="https://unpkg.com/vue"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+	<div class="wrapper-middle" id="app">
+		<div v-show="isShow" class="table-responsive" id="main-container" style="overflow: hidden">
+			<table class="table esf-table-single-head" style="width: 100%; margin-bottom: 0;">
+				<thead>
+					<tr>
+						<th style="width: 320px;">FY</th>
+						<th style="width: 150px; text-align: right;" v-for="h in headers">
+							{{h}}
+						</th>
+					</tr>
+				</thead>
+			</table>
+			<table class="table investment-details-table expand-table" style="width: 100%">
+				<tbody>
+					<tr v-for="b in bodies" v-bind:data-toggle="b.toggle" v-bind:class="b.css">
+						<td v-on:click="toggle(b.toggle)" v-bind:class="[b.IsGrouped ? 'esf-cursor': '', 'tdPadding']" v-html="b.LeftTitle"></td>
+						<td style="text-align: right;" v-for="(d, index) in b.Data">
+							<span v-show="filter.viewType == 1">{{kendo.toString(d.Amount,"c0")}}</span>
+							<span v-show="filter.viewType == 2">{{kendo.toString(d.Count,"n0")}}</span>
+							<span v-show="filter.viewType == 3">{{kendo.toString(d.Count / footers[index].feeDue.Count,"p2").replace(/\s/g, '')}}</span>
+						</td>
+					</tr>
+				</tbody>
+				<tfoot>
+					<tr class="investment-details-total">
+						<td style="width: 320px;">Fee Due - Total</td>
+						<td style="width: 150px; text-align: right;" v-for="f in footers">
+							<span v-show="filter.viewType == 1">{{kendo.toString(f.feeDue.Amount, "c0")}}</span>
+							<span v-show="filter.viewType == 2">{{kendo.toString(f.feeDue.Count, "n0")}}</span>
+							<span v-show="filter.viewType == 3">{{kendo.toString(f.feeDue.Count, "n0")}}</span>
+						</td>
+					</tr>
+					<tr class="investment-details-total">
+						<td style="width: 320px;">Fee Paid</td>
+						<td style="width: 150px; text-align: right;" v-for="f in footers">
+							<span v-show="filter.viewType == 1">{{kendo.toString(f.feePaid.Amount, "c0")}}</span>
+							<span v-show="filter.viewType == 2">{{kendo.toString(f.feePaid.Count, "n0")}}</span>
+							<span v-show="filter.viewType == 3">{{kendo.toString(f.feePaid.Count / f.feeDue.Count, "p2").replace(/\s/g, '')}}</span>
+						</td>
+					</tr>
+					<tr class="investment-details-total">
+						<td style="width: 320px;">Fee Owing</td>
+						<td style="width: 150px; text-align: right;" v-for="f in footers">
+							<span v-show="filter.viewType == 1">{{kendo.toString(f.feeOwing.Amount, "c0")}}</span>
+							<span v-show="filter.viewType == 2">{{kendo.toString(f.feeOwing.Count, "n0")}}</span>
+							<span v-show="filter.viewType == 3">{{kendo.toString(f.feeOwing.Count / f.feeDue.Count, "p2").replace(/\s/g, '')}}</span>
+						</td>
+					</tr>
+					<tr class="investment-details-total">
+						<td style="width: 320px;">Average Fee</td>
+						<td style="width: 150px; text-align: right;" v-for="f in footers">
+							<span>{{kendo.toString(f.feeAvg.Amount, "c0")}}</span>
+						</td>
+					</tr>
+				</tfoot>
+			</table>
+		</div>
+		<pagination v-show="isShow" :total-pages="totalPages" :current-page="currentPage" @@pagechanged="onPageChange" />
 </div>
 
 
@@ -63,7 +73,7 @@
     <ul class="col-choose-btn-container">
         <li class="pagination-item">
             <button type="button"
-                    @@click="onClickFirstPage"
+                    @click="onClickFirstPage"
                     :disabled="isInFirstPage"
                     aria-label="Go to first page" class="btn column-fastbackward-btn">
                 <i class="fa fa-fast-backward" aria-hidden="true"></i>
@@ -100,6 +110,49 @@
 </script>
 
 <script>
+	const Pagination = {
+        name: 'pagination',
+        template: '#pagination',
+        props: {
+            totalPages: {
+                type: Number,
+                required: true
+            },
+            currentPage: {
+                type: Number,
+                required: true
+            }
+        },
+        computed: {
+            isInFirstPage() {
+                return this.currentPage === 1;
+            },
+            isInLastPage() {
+                return this.currentPage === this.totalPages;
+            }
+        },
+        methods: {
+            onClickFirstPage() {
+                this.$emit('pagechanged', 1);
+            },
+            onClickPreviousPage() {
+                if (this.currentPage - 5 > 1)
+                    this.$emit('pagechanged', this.currentPage - 5);
+                else
+                    this.$emit('pagechanged', 1);    
+            },
+            onClickNextPage() {
+                if(this.totalPages > this.currentPage + 5)
+                    this.$emit('pagechanged', this.currentPage + 5);
+                else
+                    this.$emit('pagechanged', this.totalPages);
+            },
+            onClickLastPage() {
+                this.$emit('pagechanged', this.totalPages);
+            }
+        }
+    };
+	
 	var app = new Vue({
         el: "#app",
         components: {
@@ -220,3 +273,5 @@
         }
     });
 </script>
+</body>
+</html>
