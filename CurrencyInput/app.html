@@ -8,15 +8,27 @@
 	
 </head>
 <body>
-	<div id="app" class="container">
-		<div class="row">
+	<div id="app" class="form-horizontal">
+		<div class="form-group">
 			<div class="col-xs-4">
-				<currency-input v-model="amount" tabindex="1"></currency-input>
-				<button>TabIndex 3</button>
-				<currency-input v-model="amount1" tabindex="2" :is-format="true"></currency-input>
+				<currency-input v-model="amount" tabindex="1"></currency-input>				
+			</div>			
+		</div>
+		<div class="form-group">
+			<div class="col-xs-4">		
+				<button>TabIndex 3</button>				
+			</div>			
+		</div>		
+		<div class="form-group">
+			<div class="col-xs-4">				
+				<currency-input v-model="amount1" tabindex="2" :is-format="true"></currency-input>				
+			</div>			
+		</div>
+		<div class="form-group">
+			<div class="col-xs-4">				
 				<currency-input v-model="amount2" tabindex="3" disabled="disabled"></currency-input>
 			</div>			
-		</div>	  
+		</div>
 	</div>	
 	<script>
 		Vue.component("currency-input", {
