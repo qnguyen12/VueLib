@@ -10,8 +10,8 @@
 <body>
 	<div id="app" class="container">
 		<div class="row">
-			<div class="col-xs-12">
-				<currency-input v-model="amount"></currency-input>
+			<div class="col-xs-4">
+				<currency-input v-model="amount" v-bind:is-format="true"></currency-input>
 			</div>			
 		</div>	  
 	</div>	
@@ -20,26 +20,30 @@
             template: `
                     <div class="input-group">
                         <div class= "input-group-addon"> $</div>
-                        <input type="text" class="form-control" @blur="onBlur" v-model="displayValue" @keydown="isNumber" @focus="selectAll" v-bind:tabindex="tabindex" v-bind:disabled="disabled">
+                        <input type="text" class="form-control" @blur="onBlur" v-model="displayValue" 
+						@keydown="isNumber" @focus="selectAll" v-bind:tabindex="tabindex" v-bind:disabled="disabled">
                     </div>`,
-            props: ["value", "tabindex", "disabled"],
+            props: ["value", "tabindex", "disabled", "isFormat"],
             data: function () {
                 return {
-                    isInputActive: false
+                    isActive: false
+					//isTypingFormat: false
                 }
             },
             computed: {
                 displayValue: {
                     get: function () {                        
                         if (typeof (this.value) === "number") {                             
-                            if (!this.isInputActive) {
-                                //format display
-                                return this.value.toFixed(2).replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, "$1,");
-                            } 
-                            //format while typing
-                            var components = this.value.toString().split(".");
-                            components[0] = components[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                            return components.join(".");
+                            if (this.isFormat == true && this.isActive) {
+								//format while typing
+								var components = this.value.toString().split(".");
+								components[0] = components[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+								return components.join(".");                                
+                            }
+							if (!this.isActive){
+								//format display
+								return this.value.toFixed(2).replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, "$1,");                            
+							}						
                         }
                         return this.value;
                     },
@@ -54,8 +58,7 @@
                 }
             },
             methods: {  
-                isNumber: function(evt) {
-                        // https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
+                isNumber: function(evt) {                    
                     var keyCode = (evt.which) ? evt.which : event.keyCode;
                     // Ctrl + a, c, v
                     if (evt.ctrlKey && ([65, 67, 86].indexOf(keyCode) != -1))
@@ -79,13 +82,11 @@
                     return false;
                     },
                 onBlur: function () {
-                    this.isInputActive = false;
+                    this.isActive = false;
                     this.$emit('blur');
                 },
                 selectAll: function (event) {
-                    this.isInputActive = true;
-                    // Workaround for Safari bug
-                    // http://stackoverflow.com/questions/1269722/selecting-text-on-focus-using-jquery-not-working-in-safari-and-chrome
+                    this.isActive = true;
                     setTimeout(function () {
                         event.target.select()
                     }, 0)
