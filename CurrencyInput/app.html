@@ -11,7 +11,10 @@
 	<div id="app" class="container">
 		<div class="row">
 			<div class="col-xs-4">
-				<currency-input v-model="amount" v-bind:is-format="true"></currency-input>
+				<currency-input v-model="amount" tabindex="1"></currency-input>
+				<button>TabIndex 3</button>
+				<currency-input v-model="amount1" tabindex="2" :is-format="true"></currency-input>
+				<currency-input v-model="amount2" tabindex="3" disabled="disabled"></currency-input>
 			</div>			
 		</div>	  
 	</div>	
@@ -23,7 +26,7 @@
                         <input type="text" class="form-control" @blur="onBlur" v-model="displayValue" 
 						@keydown="isNumber" @focus="selectAll" v-bind:tabindex="tabindex" v-bind:disabled="disabled">
                     </div>`,
-            props: ["value", "tabindex", "disabled", "isFormat"],
+            props: {value: Number, tabindex: String, disabled: String, isFormat: { default: false, type: Boolean }},
             data: function () {
                 return {
                     isActive: false					
@@ -95,7 +98,9 @@
 		new Vue({
 			el: "#app",
 			data:{
-				amount: 0
+				amount: 0,
+				amount1: 0,
+				amount2: 0
 			}
 		});
 	</script>
